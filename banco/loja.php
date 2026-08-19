@@ -33,7 +33,7 @@
     <br><br>
 
     <button id="btnEditar" style="display: none;"> Editar Produto</button>
-    <button id="btnExcluir" style="display: none;"> Excluir produto</button>
+    <button id="Excluir" style="display: none;"> Excluir produto</button>
       <!-- Informações do produto -->
     <div id="informações" style="display: none;">
         <h2>Informações do Produto</h2>
@@ -72,8 +72,8 @@
         //Se nenhum produto foi selecionado
         if(opcao.value === ""){
             informacoes.style.display = "none";
-            btnEditar.style.display = "none";
-            btnExluir.style.display = "none";
+            Editar.style.display = "none";
+            Excluir.style.display = "none";
             return;
         }
 
@@ -103,11 +103,11 @@
 
         
         // Ao clicar, envia o ID para editar.php
-        btnEditar.onclick = function() {
+        Editar.onclick = function() {
             window.location.href = "editar.php?id=" + select.value;
         };
 
-        btnExluir.onclick = function() {
+        Excluir.onclick = function() {
             if(confirm("Tem certeza que deseja excluir este produto?")){
                 window.location.href = "excluir.php?id=" + select.value;
             }
