@@ -5,7 +5,7 @@ import time
 
 driver = webdriver.Chrome()
 
-driver.get("http://localhost/Marcus/Exercicios/banco/loja.php")
+driver.get("[coloque o caminho do arquivo aqui]")
 
 select_element = driver.find_element(By.ID, "produto")
 select_produto = Select(select_element)
