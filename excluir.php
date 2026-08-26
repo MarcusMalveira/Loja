@@ -8,7 +8,7 @@
 
     $id = (int) $_GET['id'];
 
-    $stmt = $pdo->prepare("DELETE FROM produto WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT * FROM produto WHERE id = ?");
     $stmt->execute([$id]);
 
     $produto = $stmt->fetch(PDO::FETCH_ASSOC);
