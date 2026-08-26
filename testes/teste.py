@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 import time
 
 driver = webdriver.Chrome()
-driver.get("http://localhost/Marcus/Exercicios/banco/loja.php")
+driver.get("[coloque o caminho do arquivo aqui]")
 select_produto = driver.find_element(By.ID, "produto")
 
 if(driver.title == "Loja"):
