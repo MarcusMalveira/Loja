@@ -5,7 +5,7 @@ import time
 
 driver = webdriver.Chrome()
 
-driver.get("http://localhost/Marcus/Exercicios/banco/loja.php")
+driver.get("[coloque o caminho do arquivo aqui]")
 
 time.sleep(2)
 
