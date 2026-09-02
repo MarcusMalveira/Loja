@@ -29,6 +29,31 @@
                     unset($_SESSION['carrinho'][$indice]);
                 }
 
+            }elseif ($acao === 'definir') {
+
+                $novaQuantidade = (int) $_POST['quantidade'];
+
+                $stmt = $pdo->prepare(
+                    "SELECT quantidade FROM produto WHERE id = ?"
+                );
+
+                $stmt->execute([$id]);
+
+                $produtoBanco = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($produtoBanco) {
+
+                    if ($novaQuantidade <= 0) {
+
+                        unset($_SESSION['carrinho'][$indice]);
+
+                    } elseif (
+                        $novaQuantidade <= $produtoBanco['quantidade']
+                    ) {
+
+                        $item['quantidade'] = $novaQuantidade;
+                    }
+                }
             }
             break;
         }

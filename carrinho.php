@@ -60,3 +60,100 @@ $carrinho = $_SESSION['carrinho'];
 $total = 0;
 
 ?>
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Carrinho</title>
+</head>
+
+<body>
+
+    <h1>Meu Carrinho</h1>
+
+    <?php if (empty($carrinho)): ?>
+
+        <p>O carrinho está vazio.</p>
+
+        <a href="loja.php">
+            Voltar para a loja
+        </a>
+
+    <?php else: ?>
+
+        <?php foreach ($carrinho as $produto): ?>
+
+            <?php
+
+            $subtotal =
+                $produto['valor'] *
+                $produto['quantidade'];
+
+            $total += $subtotal;
+
+            ?>
+
+            <div>
+                <h2>
+                    <?= $produto['nome'] ?>
+                </h2>
+                <p>
+                    Preço:R$<?= number_format($produto['valor'], 2, ',', '.') ?>
+                </p>
+                <p>Quantidade:</p>
+                <div>
+                    <form method="POST" action="alterarQuantidade.php">
+                        <input type="hidden" name="id" value="<?= $produto['id'] ?>">
+
+                        <input type="hidden" name="acao" value="definir">
+
+                        <input type="number" name="quantidade" value="<?= $produto['quantidade'] ?>" min="1">
+
+                        <button type="submit">
+                            Atualizar
+                        </button>
+                    </form>
+                    <div style="display: flex; gap: 5px;">
+                        <form method="POST" action="alterarQuantidade.php">
+                            <input type="hidden" name="id" value="<?= $produto['id'] ?>">
+                            <input type="hidden" name="acao" value="diminuir">
+                            <button type="submit" id="diminuir">-</button>
+                        </form>
+
+                        <form method="POST" action="alterarQuantidade.php">
+                            <input type="hidden" name="id" value="<?= $produto['id'] ?>">
+                            <input type="hidden" name="acao" value="aumentar">
+                            <button type="submit" id="aumentar">+</button>
+                        </form>
+                    </div>
+                </div>
+        <?php endforeach; ?>
+        <h2>
+            Total:R$<?= number_format($total,2,',','.') ?>
+        </h2>
+        <form method="POST" action="limpar_carrinho.php"
+        >
+            <button type="submit">
+                Limpar Carrinho
+            </button>
+        </form>
+        <form method="POST" action="finalizar_compra.php">
+            <button type="submit" id="finalizar_compra">
+                Finalizar Compra
+            </button>
+        </form>
+        <br><br>
+        <a href="loja.php">
+            Continuar comprando
+        </a>
+
+    <?php endif; ?>
+
+</body>
+
+</html>
