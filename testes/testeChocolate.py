@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import Select
 import time
 
 driver = webdriver.Chrome()
-driver.get("[coloque o caminho do arquivo aqui]")
+driver.get("http://localhost/Marcus/Exercicios/banco/loja.php")
 
 select_element = driver.find_element(By.ID, "produto")
 

@@ -77,7 +77,9 @@ $total = 0;
                 </div>
             <?php endforeach; ?>
             <h2>Total: R$ <?= number_format($total, 2, ',', '.') ?></h2>
-            <button>Finalizar Compra</button>
+            <form method="POST" action="finalizar_compra.php">
+            <button type="submit">Finalizar Compra</button>
+            </form>
             <br><br>
             <a href="loja.php">Continuar comprando</a>
         <?php endif; ?>
