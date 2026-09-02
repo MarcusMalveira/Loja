@@ -78,6 +78,9 @@
             <button type="submit">
                 Adicionar ao Carrinho
             </button>
+            <a href="carrinho.php" id="ver_carrinho">
+                Ver Carrinho
+            </a>
         </form>
         <br>
         <form method="GET" action="editar.php">

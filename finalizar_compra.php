@@ -37,11 +37,21 @@ try{
             $stmt->execute([$novaQuantidade, $id]);
         }
     }
+    $pdo->commit();
+    unset($_SESSION['carrinho']);
+
+
 } catch (Exception $e) {
     pdo->rollBack();
     die("Erro ao finalizar a compra: " . $e->getMessage());
 }
 ?>
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
