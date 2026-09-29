@@ -18,16 +18,16 @@
     <select id="produto" onchange="mostrarInformacoes()">
         <option value="">Selecione um produto</option>
 
-        <?php foreach ($produtos as $produto): ?>
-            <option
-                value="<?= $produto['id'] ?>"
-                data-preco="<?= $produto['valor'] ?>"
-                data-validade="<?= $produto['validade'] ?>"
-                data-estoque="<?= $produto['quantidade'] ?>"
-            >
-                <?= htmlspecialchars($produto['nome']) ?>
-            </option>
-        <?php endforeach; ?>
+                <?php foreach ($produtos as $produto): ?>
+                    <option
+                        value="<?= $produto->getId() ?>"
+                        data-preco="<?= $produto->getValor() ?>"
+                        data-validade="<?= $produto->getValidade() ?>"
+                        data-estoque="<?= $produto->getQuantidade() ?>"
+                    >
+                        <?= htmlspecialchars($produto->getNome()) ?>
+                    </option>
+                <?php endforeach; ?>
     </select>
 
     <div id="informacoes" style="display: none;">

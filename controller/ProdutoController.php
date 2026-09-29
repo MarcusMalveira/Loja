@@ -1,14 +1,15 @@
 <?php
 
 require_once __DIR__ . '/../config/conexao.php';
-require_once __DIR__ . '/../model/ProdutoModel.php';
+require_once __DIR__ . '/../model/dao/ProdutoDAO.php';
+require_once __DIR__ . '/../model/dto/ProdutoDTO.php';
 
-$model = new ProdutoModel($pdo);
+$produtoDAO = new ProdutoDAO($pdo);
 $acao = $_GET['acao'] ?? 'listar';
 
 switch ($acao) {
     case 'listar':
-        $produtos = $model->listarTodos();
+        $produtos = $produtoDAO->listarTodos();
         require __DIR__ . '/../view/loja.php';
         break;
 
@@ -22,12 +23,13 @@ switch ($acao) {
             exit;
         }
 
-        $model->cadastrarOuSomar(
-            trim($_POST['nome']),
-            (float) $_POST['valor'],
-            (int) $_POST['quantidade'],
-            $_POST['validade']
-        );
+        $produto = new ProdutoDTO();
+        $produto->setNome($_POST['nome']);
+        $produto->setValor($_POST['valor']);
+        $produto->setQuantidade($_POST['quantidade']);
+        $produto->setValidade($_POST['validade']);
+
+        $produtoDAO->cadastrarOuSomar($produto);
 
         header('Location: ProdutoController.php?acao=listar');
         exit;
@@ -37,8 +39,7 @@ switch ($acao) {
             die('ID do produto não encontrado');
         }
 
-        $id = (int) $_GET['id'];
-        $produto = $model->buscarPorId($id);
+        $produto = $produtoDAO->buscarPorId((int) $_GET['id']);
 
         if (!$produto) {
             die('Produto não encontrado');
@@ -48,17 +49,18 @@ switch ($acao) {
         break;
 
     case 'atualizar':
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
-            die('Dados inválidos para atualização');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            die('Requisição inválida');
         }
 
-        $model->atualizar(
-            (int) $_POST['id'],
-            trim($_POST['nome']),
-            (float) $_POST['valor'],
-            (int) $_POST['quantidade'],
-            $_POST['validade']
-        );
+        $produto = new ProdutoDTO();
+        $produto->setId($_POST['id']);
+        $produto->setNome($_POST['nome']);
+        $produto->setValor($_POST['valor']);
+        $produto->setQuantidade($_POST['quantidade']);
+        $produto->setValidade($_POST['validade']);
+
+        $produtoDAO->atualizar($produto);
 
         header('Location: ProdutoController.php?acao=listar');
         exit;
@@ -68,18 +70,12 @@ switch ($acao) {
             die('ID do produto não encontrado');
         }
 
-        $id = (int) $_GET['id'];
-
-        if (!$model->buscarPorId($id)) {
-            die('Produto não encontrado');
-        }
-
-        $model->excluir($id);
+        $produtoDAO->excluir((int) $_GET['id']);
 
         header('Location: ProdutoController.php?acao=listar');
         exit;
 
     default:
-        http_response_code(404);
-        echo 'Ação não encontrada.';
+        echo "Ação inválida.";
+        break;
 }

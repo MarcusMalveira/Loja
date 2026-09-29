@@ -3,9 +3,10 @@
 session_start();
 
 require_once __DIR__ . '/../config/conexao.php';
-require_once __DIR__ . '/../model/ProdutoModel.php';
+require_once __DIR__ . '/../model/dao/ProdutoDAO.php';
+require_once __DIR__ . '/../model/dto/ProdutoDTO.php';
 
-$model = new ProdutoModel($pdo);
+$produtoDAO = new ProdutoDAO($pdo);
 
 if (!isset($_SESSION['carrinho'])) {
     $_SESSION['carrinho'] = [];
@@ -21,95 +22,84 @@ switch ($acao) {
         break;
 
     case 'adicionar':
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ProdutoController.php?acao=listar');
-            exit;
-        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $produtoId = (int) $_POST['produto_id'];
+            $quantidade = (int) $_POST['quantidade'];
 
-        $produtoId = (int) $_POST['produto_id'];
-        $quantidade = (int) $_POST['quantidade'];
-        $produto = $model->buscarPorId($produtoId);
+            $produto = $produtoDAO->buscarPorId($produtoId);
 
-        if (!$produto) {
-            die('Produto não encontrado.');
-        }
-
-        if ($quantidade < 1 || $quantidade > $produto['quantidade']) {
-            die('Quantidade inválida ou estoque insuficiente.');
-        }
-
-        $produtoEncontrado = false;
-
-        foreach ($_SESSION['carrinho'] as &$itemCarrinho) {
-            if ($itemCarrinho['id'] == $produto['id']) {
-                $novaQuantidade = $itemCarrinho['quantidade'] + $quantidade;
-
-                if ($novaQuantidade > $produto['quantidade']) {
-                    die('Estoque insuficiente.');
-                }
-
-                $itemCarrinho['quantidade'] = $novaQuantidade;
-                $produtoEncontrado = true;
-                break;
+            if (!$produto) {
+                die("Produto não encontrado.");
             }
-        }
-        unset($itemCarrinho);
 
-        if (!$produtoEncontrado) {
-            $_SESSION['carrinho'][] = [
-                'id' => $produto['id'],
-                'nome' => $produto['nome'],
-                'valor' => $produto['valor'],
-                'quantidade' => $quantidade
-            ];
+            if ($quantidade < 1 || $quantidade > $produto->getQuantidade()) {
+                die("Quantidade inválida ou estoque insuficiente.");
+            }
+
+            $produtoEncontrado = false;
+
+            foreach ($_SESSION['carrinho'] as &$itemCarrinho) {
+                if ($itemCarrinho['id'] == $produto->getId()) {
+                    $novaQuantidade = $itemCarrinho['quantidade'] + $quantidade;
+
+                    if ($novaQuantidade > $produto->getQuantidade()) {
+                        die("Estoque insuficiente.");
+                    }
+
+                    $itemCarrinho['quantidade'] = $novaQuantidade;
+                    $produtoEncontrado = true;
+                    break;
+                }
+            }
+            unset($itemCarrinho);
+
+            if (!$produtoEncontrado) {
+                $_SESSION['carrinho'][] = [
+                    'id' => $produto->getId(),
+                    'nome' => $produto->getNome(),
+                    'valor' => $produto->getValor(),
+                    'quantidade' => $quantidade
+                ];
+            }
         }
 
         header('Location: CarrinhoController.php?acao=ver');
         exit;
 
     case 'alterar':
-        if (
-            $_SERVER['REQUEST_METHOD'] !== 'POST' ||
-            !isset($_POST['id'], $_POST['operacao'])
-        ) {
-            header('Location: CarrinhoController.php?acao=ver');
-            exit;
-        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int) $_POST['id'];
+            $operacao = $_POST['operacao'];
+            $produtoBanco = $produtoDAO->buscarPorId($id);
 
-        $id = (int) $_POST['id'];
-        $operacao = $_POST['operacao'];
-        $produtoBanco = $model->buscarPorId($id);
+            foreach ($_SESSION['carrinho'] as $indice => &$item) {
+                if ($item['id'] == $id) {
+                    if ($operacao === 'aumentar' && $produtoBanco) {
+                        if ($item['quantidade'] < $produtoBanco->getQuantidade()) {
+                            $item['quantidade']++;
+                        }
+                    } elseif ($operacao === 'diminuir') {
+                        $item['quantidade']--;
 
-        foreach ($_SESSION['carrinho'] as $indice => &$item) {
-            if ($item['id'] != $id) {
-                continue;
-            }
+                        if ($item['quantidade'] <= 0) {
+                            unset($_SESSION['carrinho'][$indice]);
+                        }
+                    } elseif ($operacao === 'definir' && $produtoBanco) {
+                        $novaQuantidade = (int) $_POST['quantidade'];
 
-            if ($operacao === 'aumentar' && $produtoBanco) {
-                if ($item['quantidade'] < $produtoBanco['quantidade']) {
-                    $item['quantidade']++;
-                }
-            } elseif ($operacao === 'diminuir') {
-                $item['quantidade']--;
-
-                if ($item['quantidade'] <= 0) {
-                    unset($_SESSION['carrinho'][$indice]);
-                }
-            } elseif ($operacao === 'definir' && $produtoBanco) {
-                $novaQuantidade = (int) ($_POST['quantidade'] ?? 0);
-
-                if ($novaQuantidade <= 0) {
-                    unset($_SESSION['carrinho'][$indice]);
-                } elseif ($novaQuantidade <= $produtoBanco['quantidade']) {
-                    $item['quantidade'] = $novaQuantidade;
+                        if ($novaQuantidade <= 0) {
+                            unset($_SESSION['carrinho'][$indice]);
+                        } elseif ($novaQuantidade <= $produtoBanco->getQuantidade()) {
+                            $item['quantidade'] = $novaQuantidade;
+                        }
+                    }
+                    break;
                 }
             }
 
-            break;
+            unset($item);
+            $_SESSION['carrinho'] = array_values($_SESSION['carrinho']);
         }
-        unset($item);
-
-        $_SESSION['carrinho'] = array_values($_SESSION['carrinho']);
 
         header('Location: CarrinhoController.php?acao=ver');
         exit;
@@ -125,15 +115,11 @@ switch ($acao) {
         }
 
         try {
-            $model->finalizarCompra($_SESSION['carrinho']);
+            $produtoDAO->finalizarCompra($_SESSION['carrinho']);
             $_SESSION['carrinho'] = [];
             require __DIR__ . '/../view/finalizar_compra.php';
-        } catch (Throwable $e) {
-            die('Erro ao finalizar a compra: ' . $e->getMessage());
+        } catch (Exception $e) {
+            die("Erro ao finalizar a compra: " . $e->getMessage());
         }
         break;
-
-    default:
-        http_response_code(404);
-        echo 'Ação não encontrada.';
 }
