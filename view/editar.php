@@ -9,14 +9,14 @@
     <h1>Editar Produto</h1>
 
     <form method="POST" action="../controller/ProdutoController.php?acao=atualizar">
-        <input type="hidden" name="id" value="<?= $produto['id'] ?>">
+        <input type="hidden" name="id" value="<?= $produto->getId() ?>">
 
         <label for="nome">Nome:</label>
         <input
             type="text"
             id="nome"
             name="nome"
-            value="<?= htmlspecialchars($produto['nome']) ?>"
+            value="<?= htmlspecialchars($produto->getNome()) ?>"
             required
         >
         <br>
@@ -27,7 +27,7 @@
             id="valor"
             name="valor"
             step="0.01"
-            value="<?= htmlspecialchars($produto['valor']) ?>"
+            value="<?= htmlspecialchars($produto->getValor()) ?>"
             required
         >
         <br>
@@ -37,7 +37,7 @@
             type="date"
             id="validade"
             name="validade"
-            value="<?= htmlspecialchars($produto['validade']) ?>"
+            value="<?= htmlspecialchars($produto->getValidade()) ?>"
             required
         >
         <br>
@@ -47,7 +47,7 @@
             type="number"
             id="quantidade"
             name="quantidade"
-            value="<?= htmlspecialchars($produto['quantidade']) ?>"
+            value="<?= htmlspecialchars($produto->getQuantidade()) ?>"
             required
         >
         <br>
